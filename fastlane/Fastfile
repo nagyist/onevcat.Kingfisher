@@ -7,9 +7,9 @@ platform :ios do
   desc "Runs all the tests"
   lane :tests do
     test(destination: "platform=macOS")
-    test(destination: "platform=iOS Simulator,name=iPhone 14")
+    test(destination: "platform=iOS Simulator,name=iPhone 15")
     test(destination: "platform=tvOS Simulator,name=Apple TV")
-    build(destination: "platform=watchOS Simulator,name=Apple Watch Series 8 (41mm)")
+    build(destination: "platform=watchOS Simulator,name=Apple Watch Series 9 (41mm)")
   end
     
   lane :test_ci do
@@ -18,6 +18,10 @@ platform :ios do
     else
         test(destination: ENV["DESTINATION"])
     end
+  end
+
+  lane :build_ci do
+    build(destination: ENV["DESTINATION"])
   end
 
   lane :test do |options|
@@ -88,7 +92,7 @@ platform :ios do
     target_version = "Kingfisher-#{options[:version]}"
     
     swift_version = options[:swift_version] || "5.0"
-    xcode_version = options[:xcode_version] || "15.4"
+    xcode_version = options[:xcode_version] || "16.0"
 
     xcodes(version: xcode_version, select_for_current_build_only: true)
 
@@ -138,7 +142,7 @@ platform :ios do
   end
 
   before_all do |lane|
-    xcode_version = ENV["XCODE_VERSION"] || "15.4"
+    xcode_version = ENV["XCODE_VERSION"] || "16.0"
     xcodes(version: xcode_version, select_for_current_build_only: true)
   end
 
