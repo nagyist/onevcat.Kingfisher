@@ -51,8 +51,8 @@ jobs:
             cache-key: xcode-26.4.1-macos
           - xcode: '26.4.1'
             runner: macos-26
-            destination: 'platform=iOS Simulator,name=iPhone 17,OS=26.4'
-            label: 'iOS 26.4'
+            destination: 'platform=iOS Simulator,name=iPhone 17,OS=26.4.1'
+            label: 'iOS 26.4.1'
             cache-key: xcode-26.4.1-ios
           - xcode: '26.4.1'
             runner: macos-26
