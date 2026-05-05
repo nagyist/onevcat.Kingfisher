@@ -18,42 +18,82 @@ concurrency:
 jobs:
   run-tests:
     name: test (Xcode ${{ matrix.xcode }}, ${{ matrix.label }})
-    runs-on: self-hosted
+    runs-on: ${{ matrix.runner }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - xcode: '16.4'
-            destination: 'macOS'
+            runner: macos-15
+            destination: 'platform=macOS'
             label: 'macOS'
+            cache-key: xcode-16.4-macos
           - xcode: '16.4'
-            destination: 'iOS Simulator,name=iPhone 16,OS=18.5'
+            runner: macos-15
+            destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.5'
             label: 'iOS 18.5'
+            cache-key: xcode-16.4-ios
           - xcode: '16.4'
-            destination: 'tvOS Simulator,name=Apple TV 4K (3rd generation),OS=18.5'
+            runner: macos-15
+            destination: 'platform=tvOS Simulator,name=Apple TV 4K (3rd generation),OS=18.5'
             label: 'tvOS 18.5'
+            cache-key: xcode-16.4-tvos
           - xcode: '16.4'
-            destination: 'watchOS Simulator,name=Apple Watch Series 10 (42mm),OS=11.5'
+            runner: macos-15
+            destination: 'platform=watchOS Simulator,name=Apple Watch Series 10 (42mm),OS=11.5'
             label: 'watchOS 11.5'
+            cache-key: xcode-16.4-watchos
 
-          - xcode: '26.4'
-            destination: 'macOS'
+          - xcode: '26.4.1'
+            runner: macos-26
+            destination: 'platform=macOS'
             label: 'macOS'
-          - xcode: '26.4'
-            destination: 'iOS Simulator,name=iPhone 17,OS=26.4'
+            cache-key: xcode-26.4.1-macos
+          - xcode: '26.4.1'
+            runner: macos-26
+            destination: 'platform=iOS Simulator,name=iPhone 17,OS=26.4'
             label: 'iOS 26.4'
-          - xcode: '26.4'
-            destination: 'tvOS Simulator,name=Apple TV 4K (3rd generation),OS=26.4'
+            cache-key: xcode-26.4.1-ios
+          - xcode: '26.4.1'
+            runner: macos-26
+            destination: 'platform=tvOS Simulator,name=Apple TV 4K (3rd generation),OS=26.4'
             label: 'tvOS 26.4'
-          - xcode: '26.4'
-            destination: 'watchOS Simulator,name=Apple Watch Series 11 (42mm),OS=26.4'
+            cache-key: xcode-26.4.1-tvos
+          - xcode: '26.4.1'
+            runner: macos-26
+            destination: 'platform=watchOS Simulator,name=Apple Watch Series 11 (42mm),OS=26.4'
             label: 'watchOS 26.4'
+            cache-key: xcode-26.4.1-watchos
     steps:
       - uses: actions/checkout@v4
-      - name: Install Gems
-        run: bundle install
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+      - name: Cache SwiftPM
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.swiftpm
+            ~/Library/Caches/org.swift.swiftpm
+          key: ${{ runner.os }}-${{ runner.arch }}-${{ matrix.runner }}-spm-${{ hashFiles('Package.swift', 'Package@swift-5.9.swift', 'Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-${{ matrix.runner }}-spm-
+      - name: Cache Xcode build support
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/DerivedData/${{ matrix.cache-key }}/ModuleCache.noindex
+            build/DerivedData/${{ matrix.cache-key }}/SDKStatCaches.noindex
+            build/DerivedData/${{ matrix.cache-key }}/SourcePackages
+          key: ${{ runner.os }}-${{ runner.arch }}-${{ matrix.runner }}-${{ matrix.cache-key }}-xcode-${{ hashFiles('Gemfile.lock', 'Package.swift', 'Package@swift-5.9.swift', 'Kingfisher.xcodeproj/project.pbxproj') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-${{ matrix.runner }}-${{ matrix.cache-key }}-xcode-
       - name: Run tests
         env:
-          DESTINATION: platform=${{ matrix.destination }}
+          DESTINATION: ${{ matrix.destination }}
+          DERIVED_DATA_PATH: build/DerivedData/${{ matrix.cache-key }}
           XCODE_VERSION: ${{ matrix.xcode }}
           FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: '60'
           FASTLANE_XCODEBUILD_SETTINGS_RETRIES: '4'
