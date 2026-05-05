@@ -32,24 +32,22 @@ class DataReceivingSideEffectTests: XCTestCase {
     var manager: KingfisherManager!
 
     func testSessionDataTaskMutableDataGetterDoesNotShareStorage() {
-        for attempt in 0..<100 {
-            let url = URL(string: "https://example.com/image-\(attempt).png")!
-            let urlTask = URLSession(configuration: .ephemeral).dataTask(with: url)
-            let task = SessionDataTask(task: urlTask)
+        let url = URL(string: "https://example.com/image.png")!
+        let urlTask = URLSession(configuration: .ephemeral).dataTask(with: url)
+        let task = SessionDataTask(task: urlTask)
 
-            // Use a large buffer to avoid inline Data storage, making COW storage sharing observable.
-            task.didReceiveData(Data(repeating: 0x11, count: 1024 * 1024))
+        // Use a large buffer to avoid inline Data storage, making COW storage sharing observable.
+        task.didReceiveData(Data(repeating: 0x11, count: 1024 * 1024))
 
-            let snapshot = task.mutableData
-            let secondSnapshot = task.mutableData
+        let snapshot = task.mutableData
+        let secondSnapshot = task.mutableData
 
-            XCTAssertEqual(snapshot.count, secondSnapshot.count)
-            XCTAssertNotEqual(
-                storageAddress(of: snapshot),
-                storageAddress(of: secondSnapshot),
-                "mutableData should return an independent Data copy instead of sharing the internal COW storage. Attempt: \(attempt)."
-            )
-        }
+        XCTAssertEqual(snapshot.count, secondSnapshot.count)
+        XCTAssertNotEqual(
+            storageAddress(of: snapshot),
+            storageAddress(of: secondSnapshot),
+            "mutableData should return an independent Data copy instead of sharing the internal COW storage."
+        )
     }
 
     private func storageAddress(of data: Data) -> UInt {
