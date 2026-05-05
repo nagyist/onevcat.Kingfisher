@@ -3,6 +3,13 @@ fastlane_version "1.37.0"
 default_platform :ios
 
 platform :ios do
+  def derived_data_path(destination)
+    run_id = ENV["GITHUB_RUN_ID"] || "local"
+    xcode = ENV["XCODE_VERSION"] || "default-xcode"
+    destination_key = destination.to_s.gsub(/[^A-Za-z0-9_.-]/, "_")
+    File.expand_path("../build/DerivedData/#{run_id}-#{xcode}-#{destination_key}", __dir__)
+  end
+
   desc "Runs all the tests"
   lane :tests do
     test(destination: "platform=macOS")
@@ -27,6 +34,7 @@ platform :ios do
     scan(
       scheme: "Kingfisher",
       clean: true,
+      derived_data_path: derived_data_path(options[:destination]),
       xcargs: "SWIFT_VERSION=5.0",
       destination: options[:destination]
     )
@@ -38,6 +46,8 @@ platform :ios do
       configuration: "Debug",
       scheme: "Kingfisher",
       destination: options[:destination],
+      derivedDataPath: derived_data_path(options[:destination]),
+      clean: true,
       build: true,
       build_settings: {
         "SWIFT_VERSION" => "5.0"
