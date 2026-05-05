@@ -29,7 +29,11 @@ platform :ios do
   end
 
   lane :build_ci do
-    build(destination: ENV["DESTINATION"])
+    if ENV["SDK"].to_s.empty?
+      build(destination: ENV["DESTINATION"])
+    else
+      build(sdk: ENV["SDK"])
+    end
   end
 
   lane :test do |options|
@@ -43,18 +47,25 @@ platform :ios do
   end
 
   lane :build do |options|
-    xcodebuild(
+    build_options = {
       workspace: "Kingfisher.xcworkspace",
       configuration: "Debug",
       scheme: "Kingfisher",
-      destination: options[:destination],
-      derivedDataPath: derived_data_path(options[:destination]),
+      derivedDataPath: derived_data_path(options[:destination] || options[:sdk]),
       clean: true,
       build: true,
       build_settings: {
         "SWIFT_VERSION" => "5.0"
       }
-    )
+    }
+
+    if options[:sdk].to_s.empty?
+      build_options[:destination] = options[:destination]
+    else
+      build_options[:sdk] = options[:sdk]
+    end
+
+    xcodebuild(build_options)
   end
 
   desc "Lint"

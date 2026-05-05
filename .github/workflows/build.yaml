@@ -30,17 +30,17 @@ jobs:
             cache-key: xcode-16.2-macos
           - xcode: '16.2'
             runner: macos-15
-            destination: 'generic/platform=iOS Simulator'
+            sdk: iphonesimulator
             label: 'iOS Simulator'
             cache-key: xcode-16.2-ios
           - xcode: '16.2'
             runner: macos-15
-            destination: 'generic/platform=tvOS Simulator'
+            sdk: appletvsimulator
             label: 'tvOS Simulator'
             cache-key: xcode-16.2-tvos
           - xcode: '16.2'
             runner: macos-15
-            destination: 'generic/platform=watchOS Simulator'
+            sdk: watchsimulator
             label: 'watchOS Simulator'
             cache-key: xcode-16.2-watchos
 
@@ -51,17 +51,17 @@ jobs:
             cache-key: xcode-16.3-macos
           - xcode: '16.3'
             runner: macos-15
-            destination: 'generic/platform=iOS Simulator'
+            sdk: iphonesimulator
             label: 'iOS Simulator'
             cache-key: xcode-16.3-ios
           - xcode: '16.3'
             runner: macos-15
-            destination: 'generic/platform=tvOS Simulator'
+            sdk: appletvsimulator
             label: 'tvOS Simulator'
             cache-key: xcode-16.3-tvos
           - xcode: '16.3'
             runner: macos-15
-            destination: 'generic/platform=watchOS Simulator'
+            sdk: watchsimulator
             label: 'watchOS Simulator'
             cache-key: xcode-16.3-watchos
 
@@ -72,17 +72,17 @@ jobs:
             cache-key: xcode-26.0.1-macos
           - xcode: '26.0.1'
             runner: macos-26
-            destination: 'generic/platform=iOS Simulator'
+            sdk: iphonesimulator
             label: 'iOS Simulator'
             cache-key: xcode-26.0.1-ios
           - xcode: '26.0.1'
             runner: macos-26
-            destination: 'generic/platform=tvOS Simulator'
+            sdk: appletvsimulator
             label: 'tvOS Simulator'
             cache-key: xcode-26.0.1-tvos
           - xcode: '26.0.1'
             runner: macos-26
-            destination: 'generic/platform=watchOS Simulator'
+            sdk: watchsimulator
             label: 'watchOS Simulator'
             cache-key: xcode-26.0.1-watchos
 
@@ -93,17 +93,17 @@ jobs:
             cache-key: xcode-26.2-macos
           - xcode: '26.2'
             runner: macos-26
-            destination: 'generic/platform=iOS Simulator'
+            sdk: iphonesimulator
             label: 'iOS Simulator'
             cache-key: xcode-26.2-ios
           - xcode: '26.2'
             runner: macos-26
-            destination: 'generic/platform=tvOS Simulator'
+            sdk: appletvsimulator
             label: 'tvOS Simulator'
             cache-key: xcode-26.2-tvos
           - xcode: '26.2'
             runner: macos-26
-            destination: 'generic/platform=watchOS Simulator'
+            sdk: watchsimulator
             label: 'watchOS Simulator'
             cache-key: xcode-26.2-watchos
 
@@ -114,17 +114,17 @@ jobs:
             cache-key: xcode-26.3-macos
           - xcode: '26.3'
             runner: macos-26
-            destination: 'generic/platform=iOS Simulator'
+            sdk: iphonesimulator
             label: 'iOS Simulator'
             cache-key: xcode-26.3-ios
           - xcode: '26.3'
             runner: macos-26
-            destination: 'generic/platform=tvOS Simulator'
+            sdk: appletvsimulator
             label: 'tvOS Simulator'
             cache-key: xcode-26.3-tvos
           - xcode: '26.3'
             runner: macos-26
-            destination: 'generic/platform=watchOS Simulator'
+            sdk: watchsimulator
             label: 'watchOS Simulator'
             cache-key: xcode-26.3-watchos
     steps:
@@ -137,6 +137,7 @@ jobs:
       - name: Build framework
         env:
           DESTINATION: ${{ matrix.destination }}
+          SDK: ${{ matrix.sdk }}
           DERIVED_DATA_PATH: build/DerivedData/${{ matrix.cache-key }}
           XCODE_VERSION: ${{ matrix.xcode }}
           FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: '60'
