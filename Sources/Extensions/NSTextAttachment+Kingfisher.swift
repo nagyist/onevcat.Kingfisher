@@ -172,10 +172,9 @@ extension KingfisherWrapper where Base: NSTextAttachment {
         completionHandler: (@MainActor @Sendable (Result<RetrieveImageResult, KingfisherError>) -> Void)? = nil
     ) -> DownloadTask?
     {
-        var mutatingSelf = self
         guard let source = source else {
             base.image = placeholder
-            mutatingSelf.taskIdentifier = nil
+            setTaskIdentifierValue(nil)
             completionHandler?(.failure(KingfisherError.imageSettingError(reason: .emptySource)))
             return nil
         }
@@ -186,19 +185,20 @@ extension KingfisherWrapper where Base: NSTextAttachment {
         }
 
         let issuedIdentifier = Source.Identifier.next()
-        mutatingSelf.taskIdentifier = issuedIdentifier
+        setTaskIdentifierValue(issuedIdentifier)
 
         let token = CancellationToken()
-        mutatingSelf.cancellationToken?.cancel()
-        mutatingSelf.cancellationToken = token
+        cancellationToken?.cancel()
+        setCancellationTokenValue(token)
 
         if let block = progressBlock {
             options.onDataReceived = (options.onDataReceived ?? []) + [ImageLoadingProgressSideEffect(block)]
         }
+        let finalOptions = options
 
         let task = KingfisherManager.shared.retrieveImage(
             with: source,
-            options: options,
+            options: finalOptions,
             progressiveImageSetter: { self.base.image = $0 },
             referenceTaskIdentifierChecker: { !token.isCancelled },
             completionHandler: { result in
@@ -216,8 +216,8 @@ extension KingfisherWrapper where Base: NSTextAttachment {
                         return
                     }
 
-                    mutatingSelf.imageTask = nil
-                    mutatingSelf.taskIdentifier = nil
+                    self.setImageTaskValue(nil)
+                    self.setTaskIdentifierValue(nil)
 
                     switch result {
                     case .success(let value):
@@ -229,7 +229,7 @@ extension KingfisherWrapper where Base: NSTextAttachment {
                         view.setNeedsDisplay(view.bounds)
                         #endif
                     case .failure:
-                        if let image = options.onFailureImage {
+                        if let image = finalOptions.onFailureImage {
                             self.base.image = image
                         }
                     }
@@ -238,7 +238,7 @@ extension KingfisherWrapper where Base: NSTextAttachment {
         }
         )
 
-        mutatingSelf.imageTask = task
+        setImageTaskValue(task)
         return task
     }
 
@@ -280,6 +280,19 @@ extension KingfisherWrapper where Base: NSTextAttachment {
     private var imageTask: DownloadTask? {
         get { return getAssociatedObject(base, &imageTaskKey) }
         set { setRetainedAssociatedObject(base, &imageTaskKey, newValue)}
+    }
+
+    private func setTaskIdentifierValue(_ value: Source.Identifier.Value?) {
+        let box = value.map { Box($0) }
+        setRetainedAssociatedObject(base, &taskIdentifierKey, box)
+    }
+
+    private func setCancellationTokenValue(_ value: CancellationToken?) {
+        setRetainedAssociatedObject(base, &cancellationTokenKey, value)
+    }
+
+    private func setImageTaskValue(_ value: DownloadTask?) {
+        setRetainedAssociatedObject(base, &imageTaskKey, value)
     }
 }
 

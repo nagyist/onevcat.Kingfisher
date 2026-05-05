@@ -430,14 +430,15 @@ extension KingfisherWrapper {
         if let block = progressBlock {
             options.onDataReceived = (options.onDataReceived ?? []) + [ImageLoadingProgressSideEffect(block)]
         }
+        let finalOptions = options
 
         let task = KingfisherManager.shared.retrieveImage(
             with: source,
-            options: options,
+            options: finalOptions,
             downloadTaskUpdated: { task in
                 Task { @MainActor in taskAccessor.setTask(task) }
             },
-            progressiveImageSetter: { imageAccessor.setImage($0, options) },
+            progressiveImageSetter: { imageAccessor.setImage($0, finalOptions) },
             referenceTaskIdentifierChecker: { !token.isCancelled },
             completionHandler: { result in
                 CallbackQueueMain.currentOrAsync {
@@ -459,10 +460,10 @@ extension KingfisherWrapper {
 
                     switch result {
                     case .success(let value):
-                        imageAccessor.setImage(value.image, options)
+                        imageAccessor.setImage(value.image, finalOptions)
                     case .failure:
-                        if let image = options.onFailureImage {
-                            imageAccessor.setImage(image, options)
+                        if let image = finalOptions.onFailureImage {
+                            imageAccessor.setImage(image, finalOptions)
                         }
                     }
                     completionHandler?(result)
