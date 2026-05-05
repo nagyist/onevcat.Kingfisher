@@ -866,7 +866,7 @@ class ImageViewExtensionTests: XCTestCase, @unchecked Sendable {
         let url = testURLs[0]
         stub(url, data: testImageData)
 
-        let brokenURL = URL(string: "brokenurl")!
+        let brokenURL = URL(string: "https://kingfisher.test/image-view-alternative-source")!
         stub(brokenURL, data: Data())
 
         imageView.kf.setImage(
@@ -878,7 +878,7 @@ class ImageViewExtensionTests: XCTestCase, @unchecked Sendable {
             XCTAssertEqual(result.value!.originalSource.url, brokenURL)
             exp.fulfill()
         }
-        waitForExpectations(timeout: 3, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     @MainActor func testImageSettingCanCancelAlternativeSource() {

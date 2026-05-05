@@ -1064,7 +1064,7 @@ class KingfisherManagerTests: XCTestCase {
         let url = testURLs[0]
         stub(url, data: testImageData)
 
-        let brokenURL = URL(string: "brokenurl")!
+        let brokenURL = URL(string: "https://kingfisher.test/manager-alternative-source")!
         stub(brokenURL, data: Data())
 
         _ = manager.retrieveImage(
@@ -1088,10 +1088,10 @@ class KingfisherManagerTests: XCTestCase {
         let url = testURLs[0]
         stub(url, data: Data())
 
-        let brokenURL = URL(string: "brokenurl")!
+        let brokenURL = URL(string: "https://kingfisher.test/manager-alternative-errors-primary")!
         stub(brokenURL, data: Data())
 
-        let anotherBrokenURL = URL(string: "anotherBrokenURL")!
+        let anotherBrokenURL = URL(string: "https://kingfisher.test/manager-alternative-errors-secondary")!
         stub(anotherBrokenURL, data: Data())
 
         _ = manager.retrieveImage(
@@ -1129,7 +1129,7 @@ class KingfisherManagerTests: XCTestCase {
         let url = testURLs[0]
         stub(url, data: testImageData)
 
-        let brokenURL = URL(string: "brokenurl")!
+        let brokenURL = URL(string: "https://kingfisher.test/manager-alternative-task-update")!
         stub(brokenURL, data: Data())
 
         let downloadTaskUpdatedCount = LockIsolated(0)
@@ -1156,7 +1156,7 @@ class KingfisherManagerTests: XCTestCase {
         let url = testURLs[0]
         stub(url, data: testImageData)
 
-        let brokenURL = URL(string: "brokenurl")!
+        let brokenURL = URL(string: "https://kingfisher.test/manager-alternative-cancelled")!
         let brokenStub = delayedStub(brokenURL, data: Data())
 
         let task = manager.retrieveImage(
@@ -1182,7 +1182,7 @@ class KingfisherManagerTests: XCTestCase {
         
         let called = LockIsolated(false)
 
-        let brokenURL = URL(string: "brokenurl")!
+        let brokenURL = URL(string: "https://kingfisher.test/manager-alternative-cancel-updated-task")!
         stub(brokenURL, data: Data())
 
         let task = manager.retrieveImage(
