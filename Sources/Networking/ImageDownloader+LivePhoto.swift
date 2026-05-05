@@ -64,15 +64,11 @@ extension ImageDownloader {
                 if Task.isCancelled {
                     downloadTask.cancel()
                 } else {
-                    Task {
-                        await task.setTask(downloadTask)
-                    }
+                    task.setTask(downloadTask)
                 }
             }
         } onCancel: {
-            Task {
-                await task.cancel()
-            }
+            task.cancel()
         }
     }
     

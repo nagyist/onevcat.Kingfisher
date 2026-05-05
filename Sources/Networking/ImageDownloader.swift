@@ -160,20 +160,28 @@ public final class DownloadTask: @unchecked Sendable {
     }
 }
 
-actor CancellationDownloadTask {
+final class CancellationDownloadTask: @unchecked Sendable {
+    private let lock = NSLock()
     private var task: DownloadTask?
     private var isCancelled = false
 
     func setTask(_ task: DownloadTask?) {
         guard let task else { return }
+
+        lock.lock()
         self.task = task
-        if isCancelled {
-            task.cancel()
-        }
+        let shouldCancel = isCancelled
+        lock.unlock()
+
+        if shouldCancel { task.cancel() }
     }
 
     func cancel() {
+        lock.lock()
         isCancelled = true
+        let task = task
+        lock.unlock()
+
         task?.cancel()
     }
 }
@@ -629,15 +637,11 @@ extension ImageDownloader {
                 if Task.isCancelled {
                     downloadTask.cancel()
                 } else {
-                    Task {
-                        await task.setTask(downloadTask)
-                    }
+                    task.setTask(downloadTask)
                 }
             }
         } onCancel: {
-            Task {
-                await task.cancel()
-            }
+            task.cancel()
         }
     }
     

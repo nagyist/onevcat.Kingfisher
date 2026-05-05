@@ -43,13 +43,23 @@ actor CallingChecker {
                 XCTFail()
             } catch {
                 mark()
-                XCTAssertTrue((error as! KingfisherError).isTaskCancelled)
+                if let error = error as? KingfisherError {
+                    let isExpectedCancellation: Bool
+                    if case .requestError(reason: .asyncTaskContextCancelled) = error {
+                        isExpectedCancellation = true
+                    } else {
+                        isExpectedCancellation = error.isTaskCancelled
+                    }
+                    XCTAssertTrue(isExpectedCancellation)
+                } else {
+                    XCTAssertTrue(error is CancellationError)
+                }
             }
         }
         try await Task.sleep(nanoseconds: NSEC_PER_SEC / 10)
         task.cancel()
         _ = stub.go()
-        try await Task.sleep(nanoseconds: NSEC_PER_SEC / 10)
+        await task.value
         XCTAssertTrue(called)
     }
 }
