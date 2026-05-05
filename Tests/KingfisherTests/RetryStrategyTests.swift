@@ -52,7 +52,7 @@ class RetryStrategyTests: XCTestCase {
     }
 
     override func tearDownWithError() throws {
-        LSNocilla.sharedInstance().clearStubs()
+        clearStubs(afterCancelling: manager)
         clearCaches([manager.cache])
         cleanDefaultCache()
         manager = nil

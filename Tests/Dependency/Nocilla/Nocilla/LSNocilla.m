@@ -44,7 +44,9 @@ static LSNocilla *sharedInstace = nil;
 }
 
 - (NSArray *)stubbedRequests {
-    return [NSArray arrayWithArray:self.mutableRequests];
+    @synchronized (self) {
+        return [NSArray arrayWithArray:self.mutableRequests];
+    }
 }
 
 - (void)start {
@@ -61,18 +63,22 @@ static LSNocilla *sharedInstace = nil;
 }
 
 - (void)addStubbedRequest:(LSStubRequest *)request {
-    NSUInteger index = [self.mutableRequests indexOfObject:request];
+    @synchronized (self) {
+        NSUInteger index = [self.mutableRequests indexOfObject:request];
 
-    if (index == NSNotFound) {
-        [self.mutableRequests addObject:request];
-        return;
+        if (index == NSNotFound) {
+            [self.mutableRequests addObject:request];
+            return;
+        }
+
+        [self.mutableRequests replaceObjectAtIndex:index withObject:request];
     }
-
-    [self.mutableRequests replaceObjectAtIndex:index withObject:request];
 }
 
 - (void)clearStubs {
-    [self.mutableRequests removeAllObjects];
+    @synchronized (self) {
+        [self.mutableRequests removeAllObjects];
+    }
 }
 
 - (LSStubResponse *)responseForRequest:(id<LSHTTPRequest>)actualRequest {

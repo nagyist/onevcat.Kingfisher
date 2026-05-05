@@ -55,7 +55,7 @@ class NSButtonExtensionTests: XCTestCase, @unchecked Sendable {
 
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
-        LSNocilla.sharedInstance().clearStubs()
+        clearStubs(afterCancelling: KingfisherManager.shared.downloader)
         button = nil
         cleanDefaultCache()
         KingfisherManager.shared.defaultOptions = .empty

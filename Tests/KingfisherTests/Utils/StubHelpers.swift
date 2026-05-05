@@ -25,6 +25,7 @@
 //  THE SOFTWARE.
 
 import Foundation
+@testable import Kingfisher
 
 @discardableResult
 func stub(_ url: URL,
@@ -60,4 +61,13 @@ func stub(_ url: URL, errorCode: Int) {
 
 func stub(_ url: URL, error: any Error) {
     return stubRequest("GET", url.absoluteString as NSString).andFailWithError(error)
+}
+
+func clearStubs(afterCancelling downloader: ImageDownloader?) {
+    downloader?.cancelAll()
+    LSNocilla.sharedInstance().clearStubs()
+}
+
+func clearStubs(afterCancelling manager: KingfisherManager?) {
+    clearStubs(afterCancelling: manager?.downloader)
 }

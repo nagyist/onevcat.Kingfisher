@@ -228,7 +228,7 @@ class RetryStrategyStaleCacheTests: XCTestCase {
     }
 
     override func tearDown() {
-        LSNocilla.sharedInstance().clearStubs()
+        clearStubs(afterCancelling: manager)
         clearCaches([manager.cache])
         cleanDefaultCache()
         manager = nil
@@ -332,7 +332,7 @@ class KingfisherManagerStaleCacheTests: XCTestCase {
     }
 
     override func tearDown() {
-        LSNocilla.sharedInstance().clearStubs()
+        clearStubs(afterCancelling: manager)
         clearCaches([manager.cache])
         cleanDefaultCache()
         manager = nil
@@ -549,7 +549,7 @@ class ImageViewExtensionStaleCacheTests: XCTestCase, @unchecked Sendable {
     }
 
     override func tearDown() {
-        LSNocilla.sharedInstance().clearStubs()
+        clearStubs(afterCancelling: KingfisherManager.shared.downloader)
         imageView = nil
         cleanDefaultCache()
         KingfisherManager.shared.defaultOptions = .empty

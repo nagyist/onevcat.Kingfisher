@@ -48,7 +48,7 @@ class ImageDownloaderTests: XCTestCase {
     }
     
     override func tearDown() {
-        LSNocilla.sharedInstance().clearStubs()
+        clearStubs(afterCancelling: downloader)
         downloader = nil
         super.tearDown()
     }
