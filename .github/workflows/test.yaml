@@ -2,7 +2,7 @@ name: test
 
 defaults:
   run:
-    shell: bash -leo pipefail {0}
+    shell: bash -eo pipefail {0}
 
 on:
   push:
@@ -65,31 +65,12 @@ jobs:
             label: 'watchOS 26.4'
             cache-key: xcode-26.4.1-watchos
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: .ruby-version
           bundler-cache: true
-      - name: Cache SwiftPM
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.swiftpm
-            ~/Library/Caches/org.swift.swiftpm
-          key: ${{ runner.os }}-${{ runner.arch }}-${{ matrix.runner }}-spm-${{ hashFiles('Package.swift', 'Package@swift-5.9.swift', 'Package.resolved') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-${{ matrix.runner }}-spm-
-      - name: Cache Xcode build support
-        uses: actions/cache@v4
-        with:
-          path: |
-            build/DerivedData/${{ matrix.cache-key }}/ModuleCache.noindex
-            build/DerivedData/${{ matrix.cache-key }}/SDKStatCaches.noindex
-            build/DerivedData/${{ matrix.cache-key }}/SourcePackages
-          key: ${{ runner.os }}-${{ runner.arch }}-${{ matrix.runner }}-${{ matrix.cache-key }}-xcode-${{ hashFiles('Gemfile.lock', 'Package.swift', 'Package@swift-5.9.swift', 'Kingfisher.xcodeproj/project.pbxproj') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-${{ matrix.runner }}-${{ matrix.cache-key }}-xcode-
       - name: Run tests
         env:
           DESTINATION: ${{ matrix.destination }}
