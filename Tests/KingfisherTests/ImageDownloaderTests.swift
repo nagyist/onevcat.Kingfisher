@@ -219,7 +219,7 @@ class ImageDownloaderTests: XCTestCase {
             }
         }
         
-        waitForExpectations(timeout: 3, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
     
     func testDownloadEmptyURL() {

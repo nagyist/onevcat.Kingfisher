@@ -4,6 +4,8 @@ default_platform :ios
 
 platform :ios do
   def derived_data_path(destination)
+    return File.expand_path(ENV["DERIVED_DATA_PATH"], Dir.pwd) unless ENV["DERIVED_DATA_PATH"].to_s.empty?
+
     run_id = ENV["GITHUB_RUN_ID"] || "local"
     xcode = ENV["XCODE_VERSION"] || "default-xcode"
     destination_key = destination.to_s.gsub(/[^A-Za-z0-9_.-]/, "_")
@@ -19,7 +21,9 @@ platform :ios do
   end
 
   lane :test_ci do
-    if ENV["DESTINATION"].include? "watchOS" then
+    if !ENV["SDK"].to_s.empty?
+        build(sdk: ENV["SDK"])
+    elsif ENV["DESTINATION"].include? "watchOS" then
         build(destination: ENV["DESTINATION"])
     else
         test(destination: ENV["DESTINATION"])
@@ -27,7 +31,11 @@ platform :ios do
   end
 
   lane :build_ci do
-    build(destination: ENV["DESTINATION"])
+    if ENV["SDK"].to_s.empty?
+      build(destination: ENV["DESTINATION"])
+    else
+      build(sdk: ENV["SDK"])
+    end
   end
 
   lane :test do |options|
@@ -41,18 +49,25 @@ platform :ios do
   end
 
   lane :build do |options|
-    xcodebuild(
+    build_options = {
       workspace: "Kingfisher.xcworkspace",
       configuration: "Debug",
       scheme: "Kingfisher",
-      destination: options[:destination],
-      derivedDataPath: derived_data_path(options[:destination]),
+      derivedDataPath: derived_data_path(options[:destination] || options[:sdk]),
       clean: true,
       build: true,
       build_settings: {
         "SWIFT_VERSION" => "5.0"
       }
-    )
+    }
+
+    if options[:sdk].to_s.empty?
+      build_options[:destination] = options[:destination]
+    else
+      build_options[:sdk] = options[:sdk]
+    end
+
+    xcodebuild(build_options)
   end
 
   desc "Lint"

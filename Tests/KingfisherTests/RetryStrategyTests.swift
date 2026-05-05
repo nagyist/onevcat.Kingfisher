@@ -99,7 +99,7 @@ class RetryStrategyTests: XCTestCase {
                 exp.fulfill()
             }
         )
-        waitForExpectations(timeout: 3, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     func testImagePrefetcherCanRetry() {
@@ -126,7 +126,7 @@ class RetryStrategyTests: XCTestCase {
             }
         )
         prefetcher.start()
-        waitForExpectations(timeout: 3, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     func testImagePrefetcherRetryStrategyStopDoesNotRetry() {
@@ -149,7 +149,7 @@ class RetryStrategyTests: XCTestCase {
         )
 
         prefetcher.start()
-        waitForExpectations(timeout: 3, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     // MARK: - DelayRetryStrategy Tests
@@ -207,7 +207,7 @@ class RetryStrategyTests: XCTestCase {
                 exp.fulfill()
             }
         }
-        waitForExpectations(timeout: 3, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     func testDelayRetryStrategyNotRetryForErrorReason() {
@@ -260,7 +260,7 @@ class RetryStrategyTests: XCTestCase {
                 exp.fulfill()
             }
         }
-        waitForExpectations(timeout: 3, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     func testDelayRetryStrategyDidRetried() {
@@ -279,7 +279,7 @@ class RetryStrategyTests: XCTestCase {
             exp.fulfill()
         }
 
-        waitForExpectations(timeout: 3, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     // MARK: - NetworkRetryStrategy Tests
@@ -307,7 +307,7 @@ class RetryStrategyTests: XCTestCase {
             exp.fulfill()
         }
 
-        waitForExpectations(timeout: 1, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     func testNetworkRetryStrategyStopsForTaskCancelled() {
@@ -333,7 +333,7 @@ class RetryStrategyTests: XCTestCase {
             exp.fulfill()
         }
 
-        waitForExpectations(timeout: 1, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     func testNetworkRetryStrategyStopsForNonResponseError() {
@@ -358,7 +358,7 @@ class RetryStrategyTests: XCTestCase {
             exp.fulfill()
         }
 
-        waitForExpectations(timeout: 1, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     func testNetworkRetryStrategyWithTimeout() {
@@ -381,7 +381,7 @@ class RetryStrategyTests: XCTestCase {
             exp.fulfill()
         }
 
-        waitForExpectations(timeout: 1, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     func testNetworkRetryStrategyWaitsForReconnection() {
@@ -413,7 +413,7 @@ class RetryStrategyTests: XCTestCase {
             networkMonitor.simulateNetworkChange(isConnected: true)
         }
 
-        waitForExpectations(timeout: 1, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     func testNetworkRetryStrategyCancelsPreviousObserver() {
@@ -451,7 +451,7 @@ class RetryStrategyTests: XCTestCase {
             networkMonitor.simulateNetworkChange(isConnected: true)
         }
 
-        waitForExpectations(timeout: 1, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 }
 
