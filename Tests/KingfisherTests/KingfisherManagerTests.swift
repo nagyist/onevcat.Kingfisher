@@ -1151,7 +1151,7 @@ class KingfisherManagerTests: XCTestCase {
         stub(url, data: testImageData)
 
         let brokenURL = URL(string: "brokenurl")!
-        stub(brokenURL, data: Data())
+        let brokenStub = delayedStub(brokenURL, data: Data())
 
         let task = manager.retrieveImage(
             with: .network(brokenURL),
@@ -1160,10 +1160,11 @@ class KingfisherManagerTests: XCTestCase {
         {
             result in
             XCTAssertNotNil(result.error)
-            XCTAssertTrue(result.error!.isTaskCancelled)
+            XCTAssertTrue(result.error?.isTaskCancelled ?? false)
             exp.fulfill()
         }
         task?.cancel()
+        _ = brokenStub.go()
 
         waitForExpectations(timeout: 3, handler: nil)
     }

@@ -86,7 +86,7 @@ class RetryStrategyTests: XCTestCase {
     func testKingfisherManagerCanRetry() {
         let exp = expectation(description: #function)
 
-        let brokenURL = URL(string: "brokenurl")!
+        let brokenURL = URL(string: "https://kingfisher.test/retry-manager")!
         stub(brokenURL, data: Data())
 
         let retry = StubRetryStrategy()
@@ -105,7 +105,7 @@ class RetryStrategyTests: XCTestCase {
     func testImagePrefetcherCanRetry() {
         let exp = expectation(description: #function)
 
-        let brokenURL = URL(string: "brokenurl")!
+        let brokenURL = URL(string: "https://kingfisher.test/retry-prefetcher")!
         stub(brokenURL, data: Data())
 
         let retry = StubRetryStrategy()
@@ -132,7 +132,7 @@ class RetryStrategyTests: XCTestCase {
     func testImagePrefetcherRetryStrategyStopDoesNotRetry() {
         let exp = expectation(description: #function)
 
-        let brokenURL = URL(string: "brokenurl")!
+        let brokenURL = URL(string: "https://kingfisher.test/retry-prefetcher-stop")!
         stub(brokenURL, data: Data())
 
         let retry = ImmediateStopRetryStrategy()
