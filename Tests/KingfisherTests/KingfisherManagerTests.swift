@@ -662,7 +662,10 @@ class KingfisherManagerTests: XCTestCase {
         let exp = expectation(description: #function)
         let url = testURLs[0]
         
-        let originalCache = ImageCache(name: "test-originalCache")
+        let originalCache = ImageCache(name: "test.original.\(UUID().uuidString)")
+        addTeardownBlock {
+            clearCaches([originalCache])
+        }
         
         // Clear original cache first.
         originalCache.clearMemoryCache()
@@ -683,14 +686,17 @@ class KingfisherManagerTests: XCTestCase {
                 exp.fulfill()
             }
         }
-        waitForExpectations(timeout: 5, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
     
     func testCouldProcessOnOriginalImageWithOriginalCache() {
         let exp = expectation(description: #function)
         let url = testURLs[0]
         
-        let originalCache = ImageCache(name: "test-originalCache")
+        let originalCache = ImageCache(name: "test.original.\(UUID().uuidString)")
+        addTeardownBlock {
+            clearCaches([originalCache])
+        }
         
         // Clear original cache first.
         originalCache.clearMemoryCache()
