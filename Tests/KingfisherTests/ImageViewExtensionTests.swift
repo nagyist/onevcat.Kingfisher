@@ -887,17 +887,14 @@ class ImageViewExtensionTests: XCTestCase, @unchecked Sendable {
         let dataStub = delayedStub(url, data: testImageData)
 
         let brokenURL = testURLs[1]
-        let brokenStub = delayedStub(brokenURL, data: Data())
+        stub(brokenURL, data: Data())
 
         var finishCalled = false
 
-        delay(0.1) {
-            _ = brokenStub.go()
-        }
-        delay(0.3) {
+        delay(1.0) {
             self.imageView.kf.cancelDownloadTask()
         }
-        delay(0.5) {
+        delay(1.2) {
             _ = dataStub.go()
             XCTAssertTrue(finishCalled)
             exp.fulfill()
