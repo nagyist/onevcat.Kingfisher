@@ -26,6 +26,11 @@
 	id<NSURLProtocolClient> client = [self client];
 
     LSStubResponse* stubbedResponse = [[LSNocilla sharedInstance] responseForRequest:request];
+    if (!stubbedResponse) {
+        NSError *error = [NSError errorWithDomain:LSUnexpectedRequest code:0 userInfo:nil];
+        [client URLProtocol:self didFailWithError:error];
+        return;
+    }
 
     NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
     [cookieStorage setCookies:[NSHTTPCookie cookiesWithResponseHeaderFields:stubbedResponse.headers forURL:request.url]

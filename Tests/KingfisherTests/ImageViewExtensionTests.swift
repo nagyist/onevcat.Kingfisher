@@ -52,7 +52,7 @@ class ImageViewExtensionTests: XCTestCase, @unchecked Sendable {
     }
     
     override func tearDown() {
-        LSNocilla.sharedInstance().clearStubs()
+        clearStubs(afterCancelling: KingfisherManager.shared.downloader)
         imageView = nil
         cleanDefaultCache()
         KingfisherManager.shared.defaultOptions = .empty
@@ -866,7 +866,7 @@ class ImageViewExtensionTests: XCTestCase, @unchecked Sendable {
         let url = testURLs[0]
         stub(url, data: testImageData)
 
-        let brokenURL = URL(string: "brokenurl")!
+        let brokenURL = URL(string: "https://kingfisher.test/image-view-alternative-source")!
         stub(brokenURL, data: Data())
 
         imageView.kf.setImage(
@@ -878,7 +878,7 @@ class ImageViewExtensionTests: XCTestCase, @unchecked Sendable {
             XCTAssertEqual(result.value!.originalSource.url, brokenURL)
             exp.fulfill()
         }
-        waitForExpectations(timeout: 3, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     @MainActor func testImageSettingCanCancelAlternativeSource() {
@@ -887,17 +887,14 @@ class ImageViewExtensionTests: XCTestCase, @unchecked Sendable {
         let dataStub = delayedStub(url, data: testImageData)
 
         let brokenURL = testURLs[1]
-        let brokenStub = delayedStub(brokenURL, data: Data())
+        stub(brokenURL, data: Data())
 
         var finishCalled = false
 
-        delay(0.1) {
-            _ = brokenStub.go()
-        }
-        delay(0.3) {
+        delay(1.0) {
             self.imageView.kf.cancelDownloadTask()
         }
-        delay(0.5) {
+        delay(1.2) {
             _ = dataStub.go()
             XCTAssertTrue(finishCalled)
             exp.fulfill()

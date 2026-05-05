@@ -53,7 +53,7 @@ class UIButtonExtensionTests: XCTestCase, @unchecked Sendable {
     }
     
     override func tearDown() {
-        LSNocilla.sharedInstance().clearStubs()
+        clearStubs(afterCancelling: KingfisherManager.shared.downloader)
         button = nil
         cleanDefaultCache()
         KingfisherManager.shared.defaultOptions = .empty

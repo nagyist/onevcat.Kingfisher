@@ -77,7 +77,7 @@ class DataReceivingSideEffectTests: XCTestCase {
     }
 
     override func tearDown() {
-        LSNocilla.sharedInstance().clearStubs()
+        clearStubs(afterCancelling: manager)
         clearCaches([manager.cache])
         cleanDefaultCache()
         manager = nil

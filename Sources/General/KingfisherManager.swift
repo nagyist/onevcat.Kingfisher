@@ -1166,9 +1166,7 @@ extension KingfisherManager {
                     with: source,
                     options: options,
                     downloadTaskUpdated: { newTask in
-                        Task {
-                            await task.setTask(newTask)
-                        }
+                        task.setTask(newTask)
                     },
                     progressiveImageSetter: progressiveImageSetter,
                     referenceTaskIdentifierChecker: referenceTaskIdentifierChecker,
@@ -1180,6 +1178,7 @@ extension KingfisherManager {
                 // Check for cancellation that may have occurred during setup
                 if Task.isCancelled {
                     downloadTask?.cancel()
+                    task.cancel()
                     let error: KingfisherError
                     if let sessionTask = downloadTask?.sessionTask, let cancelToken = downloadTask?.cancelToken {
                         error = .requestError(reason: .taskCancelled(task: sessionTask, token: cancelToken))
@@ -1188,15 +1187,11 @@ extension KingfisherManager {
                     }
                     safeResume(with: .failure(error))
                 } else {
-                    Task {
-                        await task.setTask(downloadTask)
-                    }
+                    task.setTask(downloadTask)
                 }
             }
         } onCancel: {
-            Task {
-                await task.task?.cancel()
-            }
+            task.cancel()
         }
     }
 }

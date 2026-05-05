@@ -79,7 +79,7 @@ open class SessionDelegate: NSObject, @unchecked Sendable {
                 self.remove(task)
             }
         }
-        let token = task.addCallback(callback)
+        let token = task.addCallback(callback)!
         tasks[url] = task
         return DownloadTask(sessionTask: task, cancelToken: token)
     }
@@ -92,9 +92,9 @@ open class SessionDelegate: NSObject, @unchecked Sendable {
 
     func append(
         _ task: SessionDataTask,
-        callback: SessionDataTask.TaskCallback) -> DownloadTask
+        callback: SessionDataTask.TaskCallback) -> DownloadTask?
     {
-        let token = task.addCallback(callback)
+        guard let token = task.addCallback(callback) else { return nil }
         return DownloadTask(sessionTask: task, cancelToken: token)
     }
 
@@ -106,7 +106,9 @@ open class SessionDelegate: NSObject, @unchecked Sendable {
             return
         }
         task.removeAllCallbacks()
-        tasks[url] = nil
+        if tasks[url] === task {
+            tasks[url] = nil
+        }
     }
 
     private func task(for task: URLSessionTask) -> SessionDataTask? {
@@ -272,7 +274,7 @@ extension SessionDelegate: URLSessionDataDelegate {
         guard let sessionTask = self.task(for: task) else {
             return
         }
-        let callbacks = sessionTask.removeAllCallbacks()
+        let callbacks = sessionTask.completeAndRemoveAllCallbacks()
         sessionTask.onTaskDone.call((result, callbacks))
         remove(sessionTask)
     }

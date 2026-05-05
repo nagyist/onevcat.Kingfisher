@@ -160,10 +160,29 @@ public final class DownloadTask: @unchecked Sendable {
     }
 }
 
-actor CancellationDownloadTask {
-    var task: DownloadTask?
+final class CancellationDownloadTask: @unchecked Sendable {
+    private let lock = NSLock()
+    private var task: DownloadTask?
+    private var isCancelled = false
+
     func setTask(_ task: DownloadTask?) {
+        guard let task else { return }
+
+        lock.lock()
         self.task = task
+        let shouldCancel = isCancelled
+        lock.unlock()
+
+        if shouldCancel { task.cancel() }
+    }
+
+    func cancel() {
+        lock.lock()
+        isCancelled = true
+        let task = task
+        lock.unlock()
+
+        task?.cancel()
     }
 }
 
@@ -407,8 +426,10 @@ open class ImageDownloader: @unchecked Sendable {
 
         // Ready to start download. Add it to session task manager (`sessionHandler`)
         let downloadTask: DownloadTask
-        if let existingTask = sessionDelegate.task(for: context.url) {
-            downloadTask = sessionDelegate.append(existingTask, callback: callback)
+        if let existingTask = sessionDelegate.task(for: context.url),
+           let existingDownloadTask = sessionDelegate.append(existingTask, callback: callback)
+        {
+            downloadTask = existingDownloadTask
         } else {
             let sessionDataTask = session.dataTask(with: context.request)
             sessionDataTask.priority = context.options.downloadPriority
@@ -618,15 +639,11 @@ extension ImageDownloader {
                 if Task.isCancelled {
                     downloadTask.cancel()
                 } else {
-                    Task {
-                        await task.setTask(downloadTask)
-                    }
+                    task.setTask(downloadTask)
                 }
             }
         } onCancel: {
-            Task {
-                await task.task?.cancel()
-            }
+            task.cancel()
         }
     }
     

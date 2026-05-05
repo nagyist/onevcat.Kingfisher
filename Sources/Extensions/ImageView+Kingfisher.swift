@@ -328,7 +328,7 @@ extension KingfisherWrapper where Base: KFCrossPlatformImageView {
             with: source,
             options: finalOptions,
             downloadTaskUpdated: { task in
-                Task { @MainActor in self.setImageTaskValue(task) }
+                CallbackQueueMain.currentOrAsync { self.setImageTaskValue(task) }
             },
             progressiveImageSetter: { self.base.image = $0 },
             referenceTaskIdentifierChecker: { !token.isCancelled },

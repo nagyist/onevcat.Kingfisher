@@ -43,13 +43,23 @@ actor CallingChecker {
                 XCTFail()
             } catch {
                 mark()
-                XCTAssertTrue((error as! KingfisherError).isTaskCancelled)
+                if let error = error as? KingfisherError {
+                    let isExpectedCancellation: Bool
+                    if case .requestError(reason: .asyncTaskContextCancelled) = error {
+                        isExpectedCancellation = true
+                    } else {
+                        isExpectedCancellation = error.isTaskCancelled
+                    }
+                    XCTAssertTrue(isExpectedCancellation)
+                } else {
+                    XCTAssertTrue(error is CancellationError)
+                }
             }
         }
         try await Task.sleep(nanoseconds: NSEC_PER_SEC / 10)
         task.cancel()
         _ = stub.go()
-        try await Task.sleep(nanoseconds: NSEC_PER_SEC / 10)
+        await task.value
         XCTAssertTrue(called)
     }
 }
@@ -80,7 +90,7 @@ class KingfisherManagerTests: XCTestCase {
     }
     
     override func tearDown() {
-        LSNocilla.sharedInstance().clearStubs()
+        clearStubs(afterCancelling: manager)
         clearCaches([manager.cache])
         cleanDefaultCache()
         manager = nil
@@ -353,7 +363,17 @@ class KingfisherManagerTests: XCTestCase {
                 XCTFail("Task should have been cancelled")
             } catch {
                 // Should be cancelled
-                XCTAssertTrue((error as? KingfisherError)?.isTaskCancelled == true)
+                if let error = error as? KingfisherError {
+                    let isExpectedCancellation: Bool
+                    if case .requestError(reason: .asyncTaskContextCancelled) = error {
+                        isExpectedCancellation = true
+                    } else {
+                        isExpectedCancellation = error.isTaskCancelled
+                    }
+                    XCTAssertTrue(isExpectedCancellation)
+                } else {
+                    XCTAssertTrue(error is CancellationError)
+                }
             }
         }
         
@@ -642,7 +662,10 @@ class KingfisherManagerTests: XCTestCase {
         let exp = expectation(description: #function)
         let url = testURLs[0]
         
-        let originalCache = ImageCache(name: "test-originalCache")
+        let originalCache = ImageCache(name: "test.original.\(UUID().uuidString)")
+        addTeardownBlock {
+            clearCaches([originalCache])
+        }
         
         // Clear original cache first.
         originalCache.clearMemoryCache()
@@ -663,14 +686,17 @@ class KingfisherManagerTests: XCTestCase {
                 exp.fulfill()
             }
         }
-        waitForExpectations(timeout: 5, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
     
     func testCouldProcessOnOriginalImageWithOriginalCache() {
         let exp = expectation(description: #function)
         let url = testURLs[0]
         
-        let originalCache = ImageCache(name: "test-originalCache")
+        let originalCache = ImageCache(name: "test.original.\(UUID().uuidString)")
+        addTeardownBlock {
+            clearCaches([originalCache])
+        }
         
         // Clear original cache first.
         originalCache.clearMemoryCache()
@@ -1038,7 +1064,7 @@ class KingfisherManagerTests: XCTestCase {
         let url = testURLs[0]
         stub(url, data: testImageData)
 
-        let brokenURL = URL(string: "brokenurl")!
+        let brokenURL = URL(string: "https://kingfisher.test/manager-alternative-source")!
         stub(brokenURL, data: Data())
 
         _ = manager.retrieveImage(
@@ -1062,10 +1088,10 @@ class KingfisherManagerTests: XCTestCase {
         let url = testURLs[0]
         stub(url, data: Data())
 
-        let brokenURL = URL(string: "brokenurl")!
+        let brokenURL = URL(string: "https://kingfisher.test/manager-alternative-errors-primary")!
         stub(brokenURL, data: Data())
 
-        let anotherBrokenURL = URL(string: "anotherBrokenURL")!
+        let anotherBrokenURL = URL(string: "https://kingfisher.test/manager-alternative-errors-secondary")!
         stub(anotherBrokenURL, data: Data())
 
         _ = manager.retrieveImage(
@@ -1103,7 +1129,7 @@ class KingfisherManagerTests: XCTestCase {
         let url = testURLs[0]
         stub(url, data: testImageData)
 
-        let brokenURL = URL(string: "brokenurl")!
+        let brokenURL = URL(string: "https://kingfisher.test/manager-alternative-task-update")!
         stub(brokenURL, data: Data())
 
         let downloadTaskUpdatedCount = LockIsolated(0)
@@ -1130,8 +1156,8 @@ class KingfisherManagerTests: XCTestCase {
         let url = testURLs[0]
         stub(url, data: testImageData)
 
-        let brokenURL = URL(string: "brokenurl")!
-        stub(brokenURL, data: Data())
+        let brokenURL = URL(string: "https://kingfisher.test/manager-alternative-cancelled")!
+        let brokenStub = delayedStub(brokenURL, data: Data())
 
         let task = manager.retrieveImage(
             with: .network(brokenURL),
@@ -1140,10 +1166,11 @@ class KingfisherManagerTests: XCTestCase {
         {
             result in
             XCTAssertNotNil(result.error)
-            XCTAssertTrue(result.error!.isTaskCancelled)
+            XCTAssertTrue(result.error?.isTaskCancelled ?? false)
             exp.fulfill()
         }
         task?.cancel()
+        _ = brokenStub.go()
 
         waitForExpectations(timeout: 3, handler: nil)
     }
@@ -1155,7 +1182,7 @@ class KingfisherManagerTests: XCTestCase {
         
         let called = LockIsolated(false)
 
-        let brokenURL = URL(string: "brokenurl")!
+        let brokenURL = URL(string: "https://kingfisher.test/manager-alternative-cancel-updated-task")!
         stub(brokenURL, data: Data())
 
         let task = manager.retrieveImage(

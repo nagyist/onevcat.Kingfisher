@@ -89,25 +89,35 @@
 
 - (void)delay {
     @synchronized(self) {
-        if(!_delayLock)
+        if(!_delayLock) {
             _delayLock = [[NSCondition alloc] init];
+        }
+        self.done = NO;
     }
 }
 
 - (void)go {
     NSCondition *condition = self.delayLock;
-    @synchronized(self) {
-        _delayLock = nil;
+    if (!condition) {
+        return;
     }
+
     [condition lock];
+    self.done = YES;
     [condition broadcast];
     [condition unlock];
 }
 
 - (void)waitForGo {
     NSCondition *condition = self.delayLock;
+    if (!condition) {
+        return;
+    }
+
     [condition lock];
-    [condition wait];
+    while (!self.isDone) {
+        [condition wait];
+    }
     [condition unlock];
 }
 
