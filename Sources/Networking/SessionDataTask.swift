@@ -65,6 +65,7 @@ public class SessionDataTask: @unchecked Sendable {
     public let task: URLSessionDataTask
     
     private var callbacksStore = [CancelToken: TaskCallback]()
+    private var completed = false
 
     var callbacks: [SessionDataTask.TaskCallback] {
         lock.lock()
@@ -102,9 +103,11 @@ public class SessionDataTask: @unchecked Sendable {
         _mutableData = Data()
     }
 
-    func addCallback(_ callback: TaskCallback) -> CancelToken {
+    func addCallback(_ callback: TaskCallback) -> CancelToken? {
         lock.lock()
         defer { lock.unlock() }
+        guard !completed else { return nil }
+
         callbacksStore[currentToken] = callback
         defer { currentToken += 1 }
         return currentToken
@@ -124,6 +127,16 @@ public class SessionDataTask: @unchecked Sendable {
     func removeAllCallbacks() -> [TaskCallback] {
         lock.lock()
         defer { lock.unlock() }
+        let callbacks = callbacksStore.values
+        callbacksStore.removeAll()
+        return Array(callbacks)
+    }
+
+    @discardableResult
+    func completeAndRemoveAllCallbacks() -> [TaskCallback] {
+        lock.lock()
+        defer { lock.unlock() }
+        completed = true
         let callbacks = callbacksStore.values
         callbacksStore.removeAll()
         return Array(callbacks)

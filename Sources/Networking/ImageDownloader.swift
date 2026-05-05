@@ -426,8 +426,10 @@ open class ImageDownloader: @unchecked Sendable {
 
         // Ready to start download. Add it to session task manager (`sessionHandler`)
         let downloadTask: DownloadTask
-        if let existingTask = sessionDelegate.task(for: context.url) {
-            downloadTask = sessionDelegate.append(existingTask, callback: callback)
+        if let existingTask = sessionDelegate.task(for: context.url),
+           let existingDownloadTask = sessionDelegate.append(existingTask, callback: callback)
+        {
+            downloadTask = existingDownloadTask
         } else {
             let sessionDataTask = session.dataTask(with: context.request)
             sessionDataTask.priority = context.options.downloadPriority
