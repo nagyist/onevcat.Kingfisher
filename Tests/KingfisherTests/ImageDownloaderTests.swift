@@ -584,12 +584,15 @@ class ImageDownloaderTests: XCTestCase {
                 exp.fulfill()
             }
         }
-        downloader.sessionDelegate = ExtensionDelegate(expectation(description: #function))
+        let metricsExpectation = expectation(description: "\(#function)-metrics")
+        let completionExpectation = expectation(description: "\(#function)-completion")
+        downloader.sessionDelegate = ExtensionDelegate(metricsExpectation)
         
         let url = testURLs[0]
         stub(url, data: testImageData)
         downloader.downloadImage(with: url) { result in
             XCTAssertNotNil(result.value)
+            completionExpectation.fulfill()
         }
         waitForExpectations(timeout: 3, handler: nil)
     }
