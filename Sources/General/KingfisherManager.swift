@@ -1180,6 +1180,9 @@ extension KingfisherManager {
                 // Check for cancellation that may have occurred during setup
                 if Task.isCancelled {
                     downloadTask?.cancel()
+                    Task {
+                        await task.cancel()
+                    }
                     let error: KingfisherError
                     if let sessionTask = downloadTask?.sessionTask, let cancelToken = downloadTask?.cancelToken {
                         error = .requestError(reason: .taskCancelled(task: sessionTask, token: cancelToken))
@@ -1195,7 +1198,7 @@ extension KingfisherManager {
             }
         } onCancel: {
             Task {
-                await task.task?.cancel()
+                await task.cancel()
             }
         }
     }

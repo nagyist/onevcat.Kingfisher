@@ -71,7 +71,7 @@ extension ImageDownloader {
             }
         } onCancel: {
             Task {
-                await task.task?.cancel()
+                await task.cancel()
             }
         }
     }

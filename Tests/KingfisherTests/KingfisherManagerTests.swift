@@ -353,7 +353,17 @@ class KingfisherManagerTests: XCTestCase {
                 XCTFail("Task should have been cancelled")
             } catch {
                 // Should be cancelled
-                XCTAssertTrue((error as? KingfisherError)?.isTaskCancelled == true)
+                if let error = error as? KingfisherError {
+                    let isExpectedCancellation: Bool
+                    if case .requestError(reason: .asyncTaskContextCancelled) = error {
+                        isExpectedCancellation = true
+                    } else {
+                        isExpectedCancellation = error.isTaskCancelled
+                    }
+                    XCTAssertTrue(isExpectedCancellation)
+                } else {
+                    XCTAssertTrue(error is CancellationError)
+                }
             }
         }
         

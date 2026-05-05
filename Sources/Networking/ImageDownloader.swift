@@ -161,9 +161,20 @@ public final class DownloadTask: @unchecked Sendable {
 }
 
 actor CancellationDownloadTask {
-    var task: DownloadTask?
+    private var task: DownloadTask?
+    private var isCancelled = false
+
     func setTask(_ task: DownloadTask?) {
+        guard let task else { return }
         self.task = task
+        if isCancelled {
+            task.cancel()
+        }
+    }
+
+    func cancel() {
+        isCancelled = true
+        task?.cancel()
     }
 }
 
@@ -625,7 +636,7 @@ extension ImageDownloader {
             }
         } onCancel: {
             Task {
-                await task.task?.cancel()
+                await task.cancel()
             }
         }
     }
