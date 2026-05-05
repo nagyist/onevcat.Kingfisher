@@ -466,15 +466,16 @@ class KingfisherManagerStaleCacheTests: XCTestCase {
         let exp = expectation(description: #function)
         let url = testURLs[0]
         let key = url.cacheKey
-        let processor = RoundCornerImageProcessor(cornerRadius: 20)
+        let processor = TrackingImageProcessor()
+        let cache = manager.cache
 
         stub(url, data: testImageData)
 
-        manager.cache.store(
+        cache.store(
             testImage, original: testImageData, forKey: key,
             toDisk: true
         ) { _ in
-            self.manager.cache.clearMemoryCache()
+            cache.clearMemoryCache()
 
             _ = self.manager.retrieveImage(
                 with: .network(url),
@@ -484,9 +485,10 @@ class KingfisherManagerStaleCacheTests: XCTestCase {
                 referenceTaskIdentifierChecker: { true },
                 completionHandler: { result in
                     XCTAssertNotNil(result.value?.image, "Valid task should return processed image")
+                    XCTAssertTrue(processor.processed, "Valid task should process the original cached image")
 
                     // Processed image should now be cached.
-                    let processedCached = self.manager.cache.imageCachedType(
+                    let processedCached = cache.imageCachedType(
                         forKey: key, processorIdentifier: processor.identifier)
                     XCTAssertTrue(processedCached.cached, "Processed image should be stored in cache")
                     exp.fulfill()

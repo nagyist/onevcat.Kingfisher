@@ -8,6 +8,28 @@
 import XCTest
 @testable import Kingfisher
 
+// MARK: - TrackingImageProcessor
+
+/// A lightweight processor that records whether it was invoked.
+/// Stale-cache tests use it when the processor's visual output is irrelevant.
+final class TrackingImageProcessor: ImageProcessor, @unchecked Sendable {
+    let identifier = "tracking"
+
+    private let processedStorage = LockIsolated(false)
+    var processed: Bool { processedStorage.value }
+
+    func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
+        processedStorage.setValue(true)
+
+        switch item {
+        case .image(let image):
+            return image
+        case .data(let data):
+            return KingfisherWrapper<KFCrossPlatformImage>.image(data: data, options: options.imageCreatingOptions)
+        }
+    }
+}
+
 // MARK: - SpyCacheSerializer
 
 /// A cache serializer that records whether `image(with:options:)` was called,
