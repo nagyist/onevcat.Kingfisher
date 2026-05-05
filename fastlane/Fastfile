@@ -21,7 +21,9 @@ platform :ios do
   end
 
   lane :test_ci do
-    if ENV["DESTINATION"].include? "watchOS" then
+    if !ENV["SDK"].to_s.empty?
+        build(sdk: ENV["SDK"])
+    elsif ENV["DESTINATION"].include? "watchOS" then
         build(destination: ENV["DESTINATION"])
     else
         test(destination: ENV["DESTINATION"])

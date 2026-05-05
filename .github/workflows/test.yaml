@@ -40,7 +40,7 @@ jobs:
             cache-key: xcode-16.4-tvos
           - xcode: '16.4'
             runner: macos-15
-            destination: 'platform=watchOS Simulator,name=Apple Watch Series 10 (42mm),OS=11.5'
+            sdk: watchsimulator
             label: 'watchOS 11.5'
             cache-key: xcode-16.4-watchos
 
@@ -61,7 +61,7 @@ jobs:
             cache-key: xcode-26.4.1-tvos
           - xcode: '26.4.1'
             runner: macos-26
-            destination: 'platform=watchOS Simulator,name=Apple Watch Series 11 (42mm),OS=26.4'
+            sdk: watchsimulator
             label: 'watchOS 26.4'
             cache-key: xcode-26.4.1-watchos
     steps:
@@ -74,6 +74,7 @@ jobs:
       - name: Run tests
         env:
           DESTINATION: ${{ matrix.destination }}
+          SDK: ${{ matrix.sdk }}
           DERIVED_DATA_PATH: build/DerivedData/${{ matrix.cache-key }}
           XCODE_VERSION: ${{ matrix.xcode }}
           FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: '60'
