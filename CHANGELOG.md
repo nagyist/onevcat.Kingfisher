@@ -2,6 +2,20 @@
 
 -----
 
+## [8.9.0 - Free Flight](https://github.com/onevcat/Kingfisher/releases/tag/8.9.0) (2026-05-05)
+
+#### Add
+* Add an opt-in `asyncCacheTypeCheck` option that dispatches the cache-existence probe onto the cache I/O queue, so the synchronous disk `stat` no longer runs on the caller thread. Useful for cell-based UI that scrolls through many cached images. [#2521](https://github.com/onevcat/Kingfisher/pull/2521) @onevcat
+* Add `data() async throws -> Data` to `ImageDataProvider` and route provider-backed loads through a Swift concurrency `Task`. Cancelling the returned `DownloadTask` (or calling `imageView.kf.cancelDownloadTask()`) now stops the provider work and reports `.dataProviderCancelled` instead of delivering a late `.success`. [#2519](https://github.com/onevcat/Kingfisher/pull/2519) [#2511](https://github.com/onevcat/Kingfisher/issues/2511) @onevcat @FaizanDurrani @friday-refined
+
+#### Fix
+* Make `SessionDataTask.mutableData` return an independent `Data` snapshot instead of sharing the internal COW buffer, fixing an `assertionFailure` in `Data.append` observed on iOS 26 when concurrent readers held onto the snapshot. [#2524](https://github.com/onevcat/Kingfisher/pull/2524) [#2523](https://github.com/onevcat/Kingfisher/issues/2523) @onevcat @jeongju9216
+* Fix a macOS crash when decoding images backed by an indexed (or pattern/unknown) color space by resolving an output-compatible color space before creating the bitmap context. [#2516](https://github.com/onevcat/Kingfisher/pull/2516) [#2467](https://github.com/onevcat/Kingfisher/issues/2467) @friday-refined @dream4java
+* Correctly calculate animated image cost by deduplicating identical frame references in the `images` array via `ObjectIdentifier`, avoiding inflated memory cost when frames share storage. [#2509](https://github.com/onevcat/Kingfisher/pull/2509) @aronspringfield
+* Document the previously undocumented `forcedCacheFileExtension` option case so DocC covers every `KingfisherOptionsInfoItem` case. [#2522](https://github.com/onevcat/Kingfisher/pull/2522) @RomanticD
+
+---
+
 ## [Next]
 
 #### Add
