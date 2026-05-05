@@ -539,7 +539,7 @@ class ImageLoadingProgressSideEffect: DataReceivingSideEffect, @unchecked Sendab
                 return
             }
 
-            let dataLength = Int64(task.mutableData.count)
+            let dataLength = Int64(task.mutableDataCount)
             self.block(dataLength, expectedContentLength)
         }
     }

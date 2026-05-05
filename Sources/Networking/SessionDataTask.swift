@@ -45,7 +45,13 @@ public class SessionDataTask: @unchecked Sendable {
     public var mutableData: Data {
         lock.lock()
         defer { lock.unlock() }
-        return _mutableData
+        return Data(_mutableData)
+    }
+
+    var mutableDataCount: Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return _mutableData.count
     }
 
     // This is a copy of `task.originalRequest?.url`. It is for obtaining race-safe behavior for a pitfall on iOS 13.
